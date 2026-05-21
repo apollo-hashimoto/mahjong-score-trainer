@@ -37,8 +37,7 @@ export default function App() {
 
     setAnswers({
       ...answers,
-      [key]:
-      value.replace(/,/g,"").replace(/[^0-9]/g,"")
+      [key]: value.replace(/,/g,"").replace(/[^0-9]/g,"")
     });
 
   }
@@ -47,13 +46,13 @@ export default function App() {
 
     const keys=[];
 
-    rows.forEach((fu)=>{
+    rows.forEach(fu=>{
 
-      hans.forEach((han)=>{
+      hans.forEach(han=>{
 
         const key=`${fu}-${han}`;
-
         const exists=scoreTable[mode]?.[key];
+
         if(!exists)return;
 
         if(mode==="子ツモ"){
@@ -129,7 +128,7 @@ export default function App() {
   }
 
   // =========================
-  // 📱 スマホUI（カード）
+  // 📱 スマホ版（カードUI）
   // =========================
   function MobileView(){
 
@@ -167,7 +166,7 @@ export default function App() {
           <div key={fu}
             style={{
               border:"1px solid #ccc",
-              padding:10,
+              padding:8,
               marginBottom:10,
               borderRadius:10
             }}
@@ -177,12 +176,19 @@ export default function App() {
               {fu}符
             </div>
 
-            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {/* ⭐ここが修正ポイント（横1列固定） */}
+            <div style={{
+              display:"flex",
+              flexWrap:"nowrap",
+              gap:6,
+              overflowX:"auto"
+            }}>
 
               {hans.map(han=>{
 
                 const key=`${fu}-${han}`;
                 const exists=scoreTable[mode]?.[key];
+
                 if(!exists) return null;
 
                 const result=results[key];
@@ -190,7 +196,9 @@ export default function App() {
                 return(
                   <div key={key}
                     style={{
-                      padding:8,
+                      padding:6,
+                      minWidth:70,
+                      flex:"0 0 auto",
                       border:"1px solid #ddd",
                       borderRadius:8,
                       background:
@@ -200,7 +208,9 @@ export default function App() {
                     }}
                   >
 
-                    <div>{han}翻</div>
+                    <div style={{fontSize:13}}>
+                      {han}翻
+                    </div>
 
                     <input
                       value={answers[key]||""}
@@ -211,7 +221,10 @@ export default function App() {
                           moveNext(key);
                         }
                       }}
-                      style={{width:70,fontSize:16}}
+                      style={{
+                        width:60,
+                        fontSize:15
+                      }}
                     />
 
                     {result && !result.correct &&
@@ -235,7 +248,7 @@ export default function App() {
   }
 
   // =========================
-  // 💻 PC UI（テーブル）
+  // 💻 PC版（表）
   // =========================
   function DesktopView(){
 
