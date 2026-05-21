@@ -34,12 +34,10 @@ export default function App() {
   const inputRefs=useRef({});
 
   function handleChange(key,value){
-
     setAnswers({
       ...answers,
       [key]: value.replace(/,/g,"").replace(/[^0-9]/g,"")
     });
-
   }
 
   function moveNext(currentKey){
@@ -47,7 +45,6 @@ export default function App() {
     const keys=[];
 
     rows.forEach(fu=>{
-
       hans.forEach(han=>{
 
         const key=`${fu}-${han}`;
@@ -63,7 +60,6 @@ export default function App() {
         }
 
       });
-
     });
 
     const i=keys.indexOf(currentKey);
@@ -72,7 +68,6 @@ export default function App() {
     if(next && inputRefs.current[next]){
       inputRefs.current[next].focus();
     }
-
   }
 
   function grade(){
@@ -80,7 +75,6 @@ export default function App() {
     const newResults={};
 
     rows.forEach(fu=>{
-
       hans.forEach(han=>{
 
         const key=`${fu}-${han}`;
@@ -104,8 +98,8 @@ export default function App() {
 
           const correct =
             mode==="親ツモ"
-            ? answer.replace("オール","")
-            : answer;
+              ? answer.replace("オール","")
+              : answer;
 
           newResults[key]={
             correct:user===correct,
@@ -115,11 +109,9 @@ export default function App() {
         }
 
       });
-
     });
 
     setResults(newResults);
-
   }
 
   function reset(){
@@ -127,9 +119,9 @@ export default function App() {
     setResults({});
   }
 
-  // =========================
-  // 📱 スマホ版（カードUI）
-  // =========================
+  // ======================
+  // 📱 スマホUI
+  // ======================
   function MobileView(){
 
     return(
@@ -137,7 +129,7 @@ export default function App() {
 
         <h2>麻雀点数表</h2>
 
-        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:10}}>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
 
           {["子ロン","子ツモ","親ロン","親ツモ"].map(m=>(
             <button
@@ -147,8 +139,8 @@ export default function App() {
                 reset();
               }}
               style={{
-                padding:"10px",
-                fontSize:16,
+                padding:"8px",
+                fontSize:14,
                 borderRadius:8,
                 background:mode===m?"#ddd":"white"
               }}
@@ -157,8 +149,8 @@ export default function App() {
             </button>
           ))}
 
-          <button onClick={grade} style={{padding:10}}>採点</button>
-          <button onClick={reset} style={{padding:10}}>リセット</button>
+          <button onClick={grade} style={{padding:8}}>採点</button>
+          <button onClick={reset} style={{padding:8}}>リセット</button>
 
         </div>
 
@@ -172,16 +164,16 @@ export default function App() {
             }}
           >
 
-            <div style={{fontWeight:"bold",marginBottom:6}}>
+            <div style={{fontWeight:"bold",marginBottom:6,fontSize:13}}>
               {fu}符
             </div>
 
-            {/* ⭐ここが修正ポイント（横1列固定） */}
+            {/* ⭐横スクロール完全廃止・圧縮 */}
             <div style={{
               display:"flex",
               flexWrap:"nowrap",
-              gap:6,
-              overflowX:"auto"
+              justifyContent:"space-between",
+              gap:3
             }}>
 
               {hans.map(han=>{
@@ -196,11 +188,11 @@ export default function App() {
                 return(
                   <div key={key}
                     style={{
-                      padding:6,
-                      minWidth:70,
-                      flex:"0 0 auto",
+                      flex:1,
+                      minWidth:0,
+                      padding:4,
                       border:"1px solid #ddd",
-                      borderRadius:8,
+                      borderRadius:6,
                       background:
                         result
                         ? (result.correct?"#ccffcc":"#ffcccc")
@@ -208,7 +200,7 @@ export default function App() {
                     }}
                   >
 
-                    <div style={{fontSize:13}}>
+                    <div style={{fontSize:11}}>
                       {han}翻
                     </div>
 
@@ -222,13 +214,13 @@ export default function App() {
                         }
                       }}
                       style={{
-                        width:60,
-                        fontSize:15
+                        width:"100%",
+                        fontSize:14
                       }}
                     />
 
                     {result && !result.correct &&
-                      <div style={{fontSize:11}}>
+                      <div style={{fontSize:10}}>
                         正解:{result.answer}
                       </div>
                     }
@@ -247,9 +239,9 @@ export default function App() {
     );
   }
 
-  // =========================
-  // 💻 PC版（表）
-  // =========================
+  // ======================
+  // 💻 PCUI
+  // ======================
   function DesktopView(){
 
     return(
