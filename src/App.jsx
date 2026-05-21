@@ -1,23 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { scoreTable } from "./scoreTable";
 
-function useIsMobile(){
-  const [isMobile,setIsMobile]=useState(false);
-
-  useEffect(()=>{
-    const check=()=>{
-      setIsMobile(window.innerWidth < 768);
-    };
-    check();
-    window.addEventListener("resize",check);
-    return ()=>window.removeEventListener("resize",check);
-  },[]);
-  return isMobile;
-}
-
 export default function App() {
-
-  const isMobile = useIsMobile();
 
   const rows=[20,25,30,40,50,60,70,80,90,100,110];
   const hans=[1,2,3,4];
@@ -29,12 +13,10 @@ export default function App() {
   const inputRefs=useRef({});
 
   function handleChange(key,value){
-
     setAnswers(prev=>({
       ...prev,
       [key]: value.replace(/[^0-9]/g,"")
     }));
-
   }
 
   function moveNext(currentKey){
@@ -43,18 +25,10 @@ export default function App() {
 
     rows.forEach(fu=>{
       hans.forEach(han=>{
-
         const key=`${fu}-${han}`;
         const exists=scoreTable[mode]?.[key];
         if(!exists)return;
-
-        if(mode==="子ツモ"){
-          keys.push(key+"-ko");
-          keys.push(key+"-oya");
-        }else{
-          keys.push(key);
-        }
-
+        keys.push(key);
       });
     });
 
@@ -114,9 +88,9 @@ export default function App() {
     setResults({});
   }
 
-  // ======================
+  // =========================
   // 📱スマホ（安定版）
-  // ======================
+  // =========================
   function MobileView(){
 
     return(
@@ -144,8 +118,8 @@ export default function App() {
             </button>
           ))}
 
-          <button onClick={grade} style={{padding:6,fontSize:13}}>採点</button>
-          <button onClick={reset} style={{padding:6,fontSize:13}}>リセット</button>
+          <button onClick={grade}>採点</button>
+          <button onClick={reset}>リセット</button>
 
         </div>
 
@@ -159,11 +133,11 @@ export default function App() {
             }}
           >
 
-            <div style={{fontWeight:"bold",fontSize:12,marginBottom:4}}>
+            <div style={{fontWeight:"bold",fontSize:12}}>
               {fu}符
             </div>
 
-            <div style={{display:"flex",gap:3}}>
+            <div style={{display:"flex",gap:4}}>
 
               {hans.map(han=>{
 
@@ -177,47 +151,62 @@ export default function App() {
                   <div key={key}
                     style={{
                       flex:1,
-                      minWidth:0,
-                      padding:3,
-                      borderRadius:6,
                       border:"1px solid #ddd",
+                      borderRadius:6,
+
+                      /* ⭐高さ固定（崩れ防止） */
+                      minHeight:78,
+
                       background:result
                         ? (result.correct?"#ccffcc":"#ffcccc")
                         : "white"
                     }}
                   >
 
-                    <div style={{fontSize:10}}>
+                    <div style={{
+                      fontSize:10,
+                      textAlign:"center",
+                      height:16
+                    }}>
                       {han}翻
                     </div>
 
-                    {/* ⭐ここが重要（安定入力） */}
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      value={answers[key] ?? ""}
-                      onChange={e=>handleChange(key,e.target.value)}
-                      onFocus={(e)=>e.target.setSelectionRange(0,999)}
-                      onKeyDown={e=>{
-                        if(e.key==="Enter"){
-                          e.preventDefault();
-                          moveNext(key);
-                        }
-                      }}
-                      style={{
-                        width:"100%",
-                        fontSize:14,
-                        padding:2,
-                        position:"relative",
-                        zIndex:1
-                      }}
-                    />
+                    <div style={{
+                      height:34,
+                      display:"flex",
+                      alignItems:"center",
+                      justifyContent:"center"
+                    }}>
 
-                    {result && !result.correct &&
-                      <div style={{fontSize:9}}>
-                        正解:{result.answer}
-                      </div>
-                    }
+                      <input
+                        ref={el=>inputRefs.current[key]=el}
+                        value={answers[key] ?? ""}
+                        onChange={e=>handleChange(key,e.target.value)}
+                        onKeyDown={e=>{
+                          if(e.key==="Enter"){
+                            e.preventDefault();
+                            moveNext(key);
+                          }
+                        }}
+                        style={{
+                          width:"90%",
+                          fontSize:14,
+                          textAlign:"center"
+                        }}
+                      />
+
+                    </div>
+
+                    {/* ⭐最初から高さ確保（後から出しても崩れない） */}
+                    <div style={{
+                      fontSize:9,
+                      textAlign:"center",
+                      height:16
+                    }}>
+                      {result && !result.correct
+                        ? `正解:${result.answer}`
+                        : " "}
+                    </div>
 
                   </div>
                 );
@@ -233,17 +222,24 @@ export default function App() {
     );
   }
 
-  // ======================
-  // 💻PC
-  // ======================
+  // =========================
+  // 💻PC（大きめ＆安定）
+  // =========================
   function DesktopView(){
 
     return(
-      <div style={{padding:16,maxWidth:1200,margin:"0 auto",fontSize:16}}>
+      <div style={{
+        padding:24,
+        maxWidth:1400,
+        margin:"0 auto",
+        fontSize:18
+      }}>
 
-        <h1>麻雀点数表トレーニング</h1>
+        <h1 style={{fontSize:28}}>
+          麻雀点数表トレーニング
+        </h1>
 
-        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:15}}>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:20}}>
 
           {["子ロン","子ツモ","親ロン","親ツモ"].map(m=>(
             <button
@@ -253,9 +249,9 @@ export default function App() {
                 reset();
               }}
               style={{
-                padding:12,
-                fontSize:16,
-                borderRadius:8,
+                padding:14,
+                fontSize:18,
+                borderRadius:10,
                 background:mode===m?"#ddd":"white"
               }}
             >
@@ -263,81 +259,94 @@ export default function App() {
             </button>
           ))}
 
-          <button onClick={grade} style={{padding:12}}>採点</button>
-          <button onClick={reset} style={{padding:12}}>リセット</button>
+          <button onClick={grade} style={{padding:14,fontSize:18}}>
+            採点
+          </button>
+
+          <button onClick={reset} style={{padding:14,fontSize:18}}>
+            リセット
+          </button>
 
         </div>
 
-        <div style={{overflowX:"auto"}}>
+        <table style={{
+          fontSize:18,
+          borderCollapse:"collapse",
+          width:"100%"
+        }}>
 
-          <table style={{fontSize:16,borderCollapse:"collapse"}}>
+          <thead>
+            <tr>
+              <th>符/翻</th>
+              {hans.map(h=><th key={h}>{h}翻</th>)}
+            </tr>
+          </thead>
 
-            <thead>
-              <tr>
-                <th>符/翻</th>
-                {hans.map(h=><th key={h}>{h}翻</th>)}
+          <tbody>
+
+            {rows.map(fu=>(
+              <tr key={fu}>
+                <td style={{padding:10}}>{fu}符</td>
+
+                {hans.map(han=>{
+
+                  const key=`${fu}-${han}`;
+                  const exists=scoreTable[mode]?.[key];
+                  const result=results[key];
+
+                  let bg="white";
+                  if(!exists) bg="#eee";
+                  else if(result) bg=result.correct?"#ccffcc":"#ffcccc";
+
+                  return(
+                    <td key={key}
+                      style={{
+                        border:"1px solid #ccc",
+                        padding:10,
+                        background:bg,
+                        minWidth:110,
+                        height:90   /* ⭐高さ固定 */
+                      }}
+                    >
+                      {exists ? (
+                        <input
+                          ref={el=>inputRefs.current[key]=el}
+                          value={answers[key] ?? ""}
+                          onChange={e=>handleChange(key,e.target.value)}
+                          style={{
+                            width:80,
+                            fontSize:18,
+                            textAlign:"center"
+                          }}
+                        />
+                      ) : "---"}
+
+                      <div style={{
+                        fontSize:12,
+                        minHeight:16,
+                        marginTop:6
+                      }}>
+                        {result && !result.correct
+                          ? `正解:${result.answer}`
+                          : " "}
+                      </div>
+
+                    </td>
+                  );
+
+                })}
+
               </tr>
-            </thead>
+            ))}
 
-            <tbody>
+          </tbody>
 
-              {rows.map(fu=>(
-                <tr key={fu}>
-                  <td>{fu}符</td>
-
-                  {hans.map(han=>{
-
-                    const key=`${fu}-${han}`;
-                    const exists=scoreTable[mode]?.[key];
-                    const result=results[key];
-
-                    let bg="white";
-                    if(!exists) bg="#e5e5e5";
-                    else if(result) bg=result.correct?"#ccffcc":"#ffcccc";
-
-                    return(
-                      <td key={key}
-                        style={{border:"1px solid #ccc",minWidth:90,background:bg}}
-                      >
-                        {exists ? (
-                          <input
-                            ref={el=>inputRefs.current[key]=el}
-                            value={answers[key] ?? ""}
-                            onChange={e=>handleChange(key,e.target.value)}
-                            onKeyDown={e=>{
-                              if(e.key==="Enter"){
-                                e.preventDefault();
-                                moveNext(key);
-                              }
-                            }}
-                            style={{width:70,fontSize:16}}
-                          />
-                        ) : "---"}
-
-                        {result && !result.correct &&
-                          <div style={{fontSize:11}}>
-                            正解:{result.answer}
-                          </div>
-                        }
-
-                      </td>
-                    );
-
-                  })}
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
+        </table>
 
       </div>
     );
   }
 
-  return isMobile ? <MobileView/> : <DesktopView/>;
+  return <DesktopView />; // ←まず安定優先で固定（あとでスマホ切替戻す）
 
 }
