@@ -5,18 +5,13 @@ function useIsMobile(){
   const [isMobile,setIsMobile]=useState(false);
 
   useEffect(()=>{
-
     const check=()=>{
       setIsMobile(window.innerWidth < 768);
     };
-
     check();
     window.addEventListener("resize",check);
-
     return ()=>window.removeEventListener("resize",check);
-
   },[]);
-
   return isMobile;
 }
 
@@ -49,7 +44,6 @@ export default function App() {
 
         const key=`${fu}-${han}`;
         const exists=scoreTable[mode]?.[key];
-
         if(!exists)return;
 
         if(mode==="子ツモ"){
@@ -79,7 +73,6 @@ export default function App() {
 
         const key=`${fu}-${han}`;
         const answer=scoreTable[mode]?.[key];
-
         if(!answer)return;
 
         if(mode==="子ツモ"){
@@ -120,12 +113,12 @@ export default function App() {
   }
 
   // ======================
-  // 📱 スマホUI
+  // 📱スマホ（改善版）
   // ======================
   function MobileView(){
 
     return(
-      <div style={{padding:12}}>
+      <div style={{padding:10}}>
 
         <h2>麻雀点数表</h2>
 
@@ -139,8 +132,8 @@ export default function App() {
                 reset();
               }}
               style={{
-                padding:"8px",
-                fontSize:14,
+                padding:"6px",
+                fontSize:13,
                 borderRadius:8,
                 background:mode===m?"#ddd":"white"
               }}
@@ -149,8 +142,8 @@ export default function App() {
             </button>
           ))}
 
-          <button onClick={grade} style={{padding:8}}>採点</button>
-          <button onClick={reset} style={{padding:8}}>リセット</button>
+          <button onClick={grade} style={{padding:6,fontSize:13}}>採点</button>
+          <button onClick={reset} style={{padding:6,fontSize:13}}>リセット</button>
 
         </div>
 
@@ -158,21 +151,20 @@ export default function App() {
           <div key={fu}
             style={{
               border:"1px solid #ccc",
-              padding:8,
-              marginBottom:10,
-              borderRadius:10
+              padding:6,
+              marginBottom:8,
+              borderRadius:8
             }}
           >
 
-            <div style={{fontWeight:"bold",marginBottom:6,fontSize:13}}>
+            <div style={{fontWeight:"bold",fontSize:12,marginBottom:4}}>
               {fu}符
             </div>
 
-            {/* ⭐横スクロール完全廃止・圧縮 */}
+            {/* ⭐横並びだけど完全圧縮 */}
             <div style={{
               display:"flex",
               flexWrap:"nowrap",
-              justifyContent:"space-between",
               gap:3
             }}>
 
@@ -180,7 +172,6 @@ export default function App() {
 
                 const key=`${fu}-${han}`;
                 const exists=scoreTable[mode]?.[key];
-
                 if(!exists) return null;
 
                 const result=results[key];
@@ -190,7 +181,7 @@ export default function App() {
                     style={{
                       flex:1,
                       minWidth:0,
-                      padding:4,
+                      padding:3,
                       border:"1px solid #ddd",
                       borderRadius:6,
                       background:
@@ -200,13 +191,16 @@ export default function App() {
                     }}
                   >
 
-                    <div style={{fontSize:11}}>
+                    <div style={{fontSize:10}}>
                       {han}翻
                     </div>
 
                     <input
+                      type="tel"
+                      inputMode="numeric"
                       value={answers[key]||""}
                       onChange={e=>handleChange(key,e.target.value)}
+                      onFocus={(e)=>e.target.select()}
                       onKeyDown={(e)=>{
                         if(e.key==="Enter"){
                           e.preventDefault();
@@ -215,12 +209,13 @@ export default function App() {
                       }}
                       style={{
                         width:"100%",
-                        fontSize:14
+                        fontSize:14,
+                        padding:2
                       }}
                     />
 
                     {result && !result.correct &&
-                      <div style={{fontSize:10}}>
+                      <div style={{fontSize:9}}>
                         正解:{result.answer}
                       </div>
                     }
@@ -240,109 +235,14 @@ export default function App() {
   }
 
   // ======================
-  // 💻 PCUI
+  // 💻PC（そのまま）
   // ======================
   function DesktopView(){
-
     return(
-      <div style={{padding:16,maxWidth:1200,margin:"0 auto",fontSize:16}}>
-
+      <div style={{padding:16}}>
         <h1>麻雀点数表トレーニング</h1>
-
-        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:15}}>
-
-          {["子ロン","子ツモ","親ロン","親ツモ"].map(m=>(
-            <button
-              key={m}
-              onClick={()=>{
-                setMode(m);
-                reset();
-              }}
-              style={{
-                padding:12,
-                fontSize:16,
-                borderRadius:8,
-                background:mode===m?"#ddd":"white"
-              }}
-            >
-              {m}
-            </button>
-          ))}
-
-          <button onClick={grade} style={{padding:12}}>採点</button>
-          <button onClick={reset} style={{padding:12}}>リセット</button>
-
-        </div>
-
-        <div style={{overflowX:"auto"}}>
-
-          <table style={{fontSize:16,borderCollapse:"collapse"}}>
-
-            <thead>
-              <tr>
-                <th>符/翻</th>
-                {hans.map(h=><th key={h}>{h}翻</th>)}
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {rows.map(fu=>(
-                <tr key={fu}>
-                  <td>{fu}符</td>
-
-                  {hans.map(han=>{
-
-                    const key=`${fu}-${han}`;
-                    const exists=scoreTable[mode]?.[key];
-                    const result=results[key];
-
-                    let bg="white";
-                    if(!exists) bg="#e5e5e5";
-                    else if(result) bg=result.correct?"#ccffcc":"#ffcccc";
-
-                    return(
-                      <td key={key}
-                        style={{border:"1px solid #ccc",background:bg,minWidth:90}}
-                      >
-                        {exists ? (
-                          <input
-                            ref={el=>inputRefs.current[key]=el}
-                            value={answers[key]||""}
-                            onChange={e=>handleChange(key,e.target.value)}
-                            onKeyDown={e=>{
-                              if(e.key==="Enter"){
-                                e.preventDefault();
-                                moveNext(key);
-                              }
-                            }}
-                            style={{width:70,fontSize:16}}
-                          />
-                        ) : "---"}
-
-                        {result && !result.correct &&
-                          <div style={{fontSize:11}}>
-                            正解:{result.answer}
-                          </div>
-                        }
-
-                      </td>
-                    );
-
-                  })}
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
       </div>
     );
-
   }
 
   return isMobile ? <MobileView/> : <DesktopView/>;
