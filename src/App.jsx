@@ -1,7 +1,23 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { scoreTable } from "./scoreTable";
 
+function useIsMobile(){
+  const [isMobile,setIsMobile]=useState(false);
+
+  useEffect(()=>{
+    const check=()=>{
+      setIsMobile(window.innerWidth < 768);
+    };
+    check();
+    window.addEventListener("resize",check);
+    return ()=>window.removeEventListener("resize",check);
+  },[]);
+  return isMobile;
+}
+
 export default function App() {
+
+  const isMobile = useIsMobile();
 
   const rows=[20,25,30,40,50,60,70,80,90,100,110];
   const hans=[1,2,3,4];
@@ -12,6 +28,26 @@ export default function App() {
 
   const inputRefs=useRef({});
 
+  // =========================
+  // 🔥キー一覧を固定化（重要）
+  // =========================
+  const keys = useMemo(()=>{
+
+    const list=[];
+
+    rows.forEach(fu=>{
+      hans.forEach(han=>{
+        const key=`${fu}-${han}`;
+        if(scoreTable[mode]?.[key]){
+          list.push(key);
+        }
+      });
+    });
+
+    return list;
+
+  },[mode]);
+
   function handleChange(key,value){
     setAnswers(prev=>({
       ...prev,
@@ -20,17 +56,6 @@ export default function App() {
   }
 
   function moveNext(currentKey){
-
-    const keys=[];
-
-    rows.forEach(fu=>{
-      hans.forEach(han=>{
-        const key=`${fu}-${han}`;
-        const exists=scoreTable[mode]?.[key];
-        if(!exists)return;
-        keys.push(key);
-      });
-    });
 
     const i=keys.indexOf(currentKey);
     const next=keys[i+1];
@@ -89,7 +114,7 @@ export default function App() {
   }
 
   // =========================
-  // 📱スマホ（安定版）
+  // 📱スマホUI（復活）
   // =========================
   function MobileView(){
 
@@ -151,58 +176,40 @@ export default function App() {
                   <div key={key}
                     style={{
                       flex:1,
+                      minWidth:0,
+                      padding:3,
                       border:"1px solid #ddd",
                       borderRadius:6,
-
-                      /* ⭐高さ固定（崩れ防止） */
-                      minHeight:78,
-
                       background:result
                         ? (result.correct?"#ccffcc":"#ffcccc")
                         : "white"
                     }}
                   >
 
-                    <div style={{
-                      fontSize:10,
-                      textAlign:"center",
-                      height:16
-                    }}>
+                    <div style={{fontSize:10}}>
                       {han}翻
                     </div>
 
-                    <div style={{
-                      height:34,
-                      display:"flex",
-                      alignItems:"center",
-                      justifyContent:"center"
-                    }}>
+                    <input
+                      ref={el=>inputRefs.current[key]=el}
+                      type="tel"
+                      inputMode="numeric"
+                      value={answers[key] ?? ""}
+                      onChange={e=>handleChange(key,e.target.value)}
+                      onKeyDown={e=>{
+                        if(e.key==="Enter"){
+                          e.preventDefault();
+                          moveNext(key);
+                        }
+                      }}
+                      style={{
+                        width:"100%",
+                        fontSize:14,
+                        textAlign:"center"
+                      }}
+                    />
 
-                      <input
-                        ref={el=>inputRefs.current[key]=el}
-                        value={answers[key] ?? ""}
-                        onChange={e=>handleChange(key,e.target.value)}
-                        onKeyDown={e=>{
-                          if(e.key==="Enter"){
-                            e.preventDefault();
-                            moveNext(key);
-                          }
-                        }}
-                        style={{
-                          width:"90%",
-                          fontSize:14,
-                          textAlign:"center"
-                        }}
-                      />
-
-                    </div>
-
-                    {/* ⭐最初から高さ確保（後から出しても崩れない） */}
-                    <div style={{
-                      fontSize:9,
-                      textAlign:"center",
-                      height:16
-                    }}>
+                    <div style={{fontSize:9}}>
                       {result && !result.correct
                         ? `正解:${result.answer}`
                         : " "}
@@ -223,7 +230,7 @@ export default function App() {
   }
 
   // =========================
-  // 💻PC（大きめ＆安定）
+  // 💻PCUI（安定版）
   // =========================
   function DesktopView(){
 
@@ -235,9 +242,7 @@ export default function App() {
         fontSize:18
       }}>
 
-        <h1 style={{fontSize:28}}>
-          麻雀点数表トレーニング
-        </h1>
+        <h1>麻雀点数表トレーニング</h1>
 
         <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:20}}>
 
@@ -259,13 +264,8 @@ export default function App() {
             </button>
           ))}
 
-          <button onClick={grade} style={{padding:14,fontSize:18}}>
-            採点
-          </button>
-
-          <button onClick={reset} style={{padding:14,fontSize:18}}>
-            リセット
-          </button>
+          <button onClick={grade}>採点</button>
+          <button onClick={reset}>リセット</button>
 
         </div>
 
@@ -286,7 +286,7 @@ export default function App() {
 
             {rows.map(fu=>(
               <tr key={fu}>
-                <td style={{padding:10}}>{fu}符</td>
+                <td>{fu}符</td>
 
                 {hans.map(han=>{
 
@@ -303,9 +303,9 @@ export default function App() {
                       style={{
                         border:"1px solid #ccc",
                         padding:10,
-                        background:bg,
                         minWidth:110,
-                        height:90   /* ⭐高さ固定 */
+                        height:90,
+                        background:bg
                       }}
                     >
                       {exists ? (
@@ -313,6 +313,12 @@ export default function App() {
                           ref={el=>inputRefs.current[key]=el}
                           value={answers[key] ?? ""}
                           onChange={e=>handleChange(key,e.target.value)}
+                          onKeyDown={e=>{
+                            if(e.key==="Enter"){
+                              e.preventDefault();
+                              moveNext(key);
+                            }
+                          }}
                           style={{
                             width:80,
                             fontSize:18,
@@ -347,6 +353,6 @@ export default function App() {
     );
   }
 
-  return <DesktopView />; // ←まず安定優先で固定（あとでスマホ切替戻す）
+  return isMobile ? <MobileView /> : <DesktopView />;
 
 }
