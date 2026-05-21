@@ -115,7 +115,7 @@ export default function App() {
   }
 
   // ======================
-  // 📱スマホ
+  // 📱スマホ（安定版）
   // ======================
   function MobileView(){
 
@@ -191,11 +191,13 @@ export default function App() {
                       {han}翻
                     </div>
 
+                    {/* ⭐ここが重要（安定入力） */}
                     <input
                       type="tel"
                       inputMode="numeric"
-                      value={answers[key] ?? ""}   // ⭐ここ重要（undefined防止）
+                      value={answers[key] ?? ""}
                       onChange={e=>handleChange(key,e.target.value)}
+                      onFocus={(e)=>e.target.setSelectionRange(0,999)}
                       onKeyDown={e=>{
                         if(e.key==="Enter"){
                           e.preventDefault();
@@ -205,7 +207,9 @@ export default function App() {
                       style={{
                         width:"100%",
                         fontSize:14,
-                        padding:2
+                        padding:2,
+                        position:"relative",
+                        zIndex:1
                       }}
                     />
 
@@ -230,7 +234,7 @@ export default function App() {
   }
 
   // ======================
-  // 💻PC（復活版）
+  // 💻PC
   // ======================
   function DesktopView(){
 
